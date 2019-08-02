@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 
 const { NODE_ENV, CLIENT_ORIGIN } = require('./config');
-const logger = require('./logger');
+const authRouter = require('./auth/auth-router');
 const app = express();
 
 
@@ -20,7 +20,9 @@ app.use(cors({
 }));
 
 
-// BASIC ENDPOINT
+// BASIC ENDPOINT & ROUTING
+
+app.use('/api/auth', authRouter);
 
 app.get('/api/', (req, res) => {
     res.json({ok: true});
