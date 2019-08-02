@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 
-const { NODE_ENV } = require('./config');
+const { NODE_ENV, CLIENT_ORIGIN } = require('./config');
 const logger = require('./logger');
 const app = express();
 
@@ -15,7 +15,9 @@ const morganOption = (NODE_ENV === 'production') ? 'tiny' : 'common';
 
 app.use(morgan(morganOption));
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: CLIENT_ORIGIN
+}));
 
 
 // BASIC ENDPOINT
