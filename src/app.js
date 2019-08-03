@@ -24,7 +24,7 @@ app.use(cors({
 // BASIC ENDPOINT & ROUTING
 
 app.use('/api/auth', authRouter);
-app.use('/api/users', authRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/api/', (req, res) => {
     res.json({ok: true});

@@ -19,11 +19,17 @@ usersRouter
             }
         }
 
+        const passwordError = UsersService.validatePassword(password);
+        if (passwordError) {
+            logger.error(`User registration failed: invalid password`);
+            return res.status(400).json({ error: passwordError })
+        }
+
         UsersService.usernameExists(req.app.get('db'), user_name)
             .then(usernameExists => {
                 if (usernameExists) {
-                    logger.error(`User registration failed: ${user_name} already exists`);
-                    return res.status(400).json({ error: 'Username already exists' })
+                    logger.error(`User registration failed: ${user_name} already taken`);
+                    return res.status(400).json({ error: 'Username already taken' })
                 }
 
                 return UsersService.hashPassword(password)
