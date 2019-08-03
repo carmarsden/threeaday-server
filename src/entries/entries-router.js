@@ -27,7 +27,7 @@ entriesRouter
             tag_other
         } = req.body;
 
-        if (!req.body[content]) {
+        if (!req.body.content) {
             logger.error(`Missing 'content' in entry post request`);
             return res.status(400).json({
                 error: `Missing 'content' in request body`
@@ -35,7 +35,7 @@ entriesRouter
         }
 
         const newEntry = {
-            user_id: req.user_id,
+            user_id: req.user.id,
             content,
             public,
             date_modified,
