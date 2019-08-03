@@ -7,6 +7,7 @@ const cors = require('cors');
 const { NODE_ENV, CLIENT_ORIGIN } = require('./config');
 const authRouter = require('./auth/auth-router');
 const usersRouter = require('./users/users-router');
+const entriesRouter = require('./entries/entries-router');
 const app = express();
 
 
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/entries', entriesRouter);
 
 app.get('/api/', (req, res) => {
     res.json({ok: true});
