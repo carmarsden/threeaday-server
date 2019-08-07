@@ -1,6 +1,6 @@
-# Express Boilerplate!
+# 3aDay Server
 
-This is a boilerplate project used for starting new projects! Created with guidance from Bloc/Thinkful curriculum.
+This was created with Express boilerplate.
 This project creates an Express server equipped with appropriate middleware & testing libraries, which is built to interface with PostgreSQL database including SQL query building and database migrations.
 
 ## Set up
