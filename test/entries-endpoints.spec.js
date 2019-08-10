@@ -72,8 +72,20 @@ describe('Entries Endpoints', function() {
             ;
         })
 
-        it(`responds with 400 error when 'content' is missing`, () => {
+        it(`responds with 400 error when submission is not an array`, () => {
             const testEntry = { stub: 'no-content' };
+            return supertest(app)
+                .post('/api/entries')
+                .set('Authorization', helpers.makeAuthHeader(testUser))
+                .send(testEntry)
+                .expect(400, {
+                    error: `Request body must be an array of objects`
+                })
+            ;
+        })
+
+        it(`responds with 400 error when 'content' is missing`, () => {
+            const testEntry = [{ stub: 'no-content' }];
             return supertest(app)
                 .post('/api/entries')
                 .set('Authorization', helpers.makeAuthHeader(testUser))
@@ -84,38 +96,46 @@ describe('Entries Endpoints', function() {
             ;
         })
 
-        it('responds 201, creates entry, returns new entry', () => {
+        it('responds 201, creates new entries, returns new entries', () => {
             this.retries(3);
-            const testEntry = {
-                content: 'Test good thing!',
-                public: true,
-                tag_serenity: true,
-            };
+            const testEntries = [
+                {
+                    content: 'Test good thing!',
+                    public: true,
+                    tag_serenity: true,
+                },
+                {
+                    content: 'This is another!',
+                    public: false,
+                    tag_awe: true,
+                }
+            ];
 
             return supertest(app)
                 .post('/api/entries')
                 .set('Authorization', helpers.makeAuthHeader(testUser))
-                .send(testEntry)
+                .send(testEntries)
                 .expect(201)
                 .expect(res => {
-                    expect(res.body).to.have.property('id')
-                    expect(res.body.content).to.eql(testEntry.content)
-                    expect(res.body.user_id).to.eql(testUser.id)
-                    expect(res.headers.location).to.eql(`/api/entries/${res.body.id}`)
+                    expect(res.body).to.be.an('array')
+                    expect(res.body).to.have.lengthOf(2)
+                    expect(res.body[0]).to.have.property('id')
+                    expect(res.body[0].content).to.eql(testEntries[0].content)
+                    expect(res.body[0].user_id).to.eql(testUser.id)
                     const expectedDate = new Date().toLocaleString('en', { timeZone: 'UTC' })
-                    const actualDate = new Date(res.body.date_modified).toLocaleString()
+                    const actualDate = new Date(res.body[0].date_modified).toLocaleString()
                     expect(actualDate).to.eql(expectedDate)
                 })
-                .expect(res =>
+                .then(res =>
                     db
                         .from('threeaday_entries')
                         .select('*')
-                        .where({ id: res.body.id })
+                        .where({ id: res.body[0].id })
                         .first()
                         .then(row => {
-                            expect(row.content).to.eql(testEntry.content)
-                            expect(row.public).to.eql(testEntry.public)
-                            expect(row.tag_serenity).to.eql(testEntry.tag_serenity)
+                            expect(row.content).to.eql(testEntries[0].content)
+                            expect(row.public).to.eql(testEntries[0].public)
+                            expect(row.tag_serenity).to.eql(testEntries[0].tag_serenity)
                             expect(row.user_id).to.eql(testUser.id)
                             const expectedDate = new Date().toLocaleString('en', { timeZone: 'UTC' })
                             const actualDate = new Date(row.date_modified).toLocaleString()
@@ -123,7 +143,6 @@ describe('Entries Endpoints', function() {
                         })
                 )
             ;
-
         })
 
     })

@@ -34,9 +34,6 @@ const EntriesService = {
             .insert(newEntries)
             .into('threeaday_entries')
             .returning('*')
-            //.then(([entry]) => entry)
-            //.then(entry => EntriesService.getById(db, entry.id))
-            //.then(entries => entries.map(entry => EntriesService.getById(db, entry.id)))
         ;
     },
 

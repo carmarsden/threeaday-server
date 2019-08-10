@@ -10,7 +10,7 @@ const jsonParser = express.json();
 entriesRouter
     .route('/')
     .get((req, res, next) => {
-        const howMany = req.param('quantity') || 10;
+        const howMany = req.query.quantity || 10;
         EntriesService.getSomePublic(req.app.get('db'), howMany)
             .then(entries => {
                 res.json(EntriesService.serializeEntries(entries))
@@ -69,7 +69,6 @@ entriesRouter
             .then(entries => {
                 res
                     .status(201)
-                    //.location(path.posix.join(req.originalUrl, `/${entry.id}`))
                     .json(EntriesService.serializeEntries(entries))
                 ;
             })
