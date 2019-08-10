@@ -1,6 +1,7 @@
 const knex = require('knex');
 const app = require('../src/app');
 const helpers = require('./test-helpers');
+const EntriesService = require('../src/entries/entries-service');
 
 describe('Entries Endpoints', function() {
     let db;
@@ -24,6 +25,40 @@ describe('Entries Endpoints', function() {
 
 
     // BEGIN TEST CASES
+
+    describe('GET /api/entries', () => {
+        beforeEach('insert entries', () => helpers.seedEntries(db, testEntries));
+
+        it('responds with entries on get request', () => {
+            const expectedEntries = testEntries
+                .filter(entry => entry.public === true)
+                .sort(function(a, b) {
+                    return new Date(b.date_modified) - new Date(a.date_modified)
+                })
+                .slice(0,10)
+            ;
+            const expectedOutput = EntriesService.serializeEntries(expectedEntries);
+            return supertest(app)
+                .get('/api/entries')
+                .expect(200, expectedOutput)
+            ;
+        })
+
+        it('respects "quantity" get request parameter', () => {
+            const expectedEntries = testEntries
+                .filter(entry => entry.public === true)
+                .sort(function(a, b) {
+                    return new Date(b.date_modified) - new Date(a.date_modified)
+                })
+                .slice(0,2)
+            ;
+            const expectedOutput = EntriesService.serializeEntries(expectedEntries);
+            return supertest(app)
+                .get('/api/entries?quantity=2')
+                .expect(200, expectedOutput)
+            ;
+        })
+    })
 
     describe('POST /api/entries', () => {
         it(`responds with 401 error when posting without JWT`, () => {

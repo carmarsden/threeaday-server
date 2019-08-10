@@ -9,6 +9,15 @@ const jsonParser = express.json();
 
 entriesRouter
     .route('/')
+    .get((req, res, next) => {
+        const howMany = req.param('quantity') || 10;
+        EntriesService.getSomePublic(req.app.get('db'), howMany)
+            .then(entries => {
+                res.json(EntriesService.serializeEntries(entries))
+            })
+            .catch(next)
+        ;
+    })
     .post(requireAuth, jsonParser, (req, res, next) => {
         const {
             content,
@@ -59,6 +68,18 @@ entriesRouter
                     .location(path.posix.join(req.originalUrl, `/${entry.id}`))
                     .json(EntriesService.serializeEntry(entry))
                 ;
+            })
+            .catch(next)
+        ;
+    })
+;
+
+entriesRouter
+    .route('/byuser')
+    .get(requireAuth, (req, res, next) => {
+        EntriesService.getByUser(req.app.get('db'), req.user.id)
+            .then(entries => {
+                res.json(EntriesService.serializeEntries(entries))
             })
             .catch(next)
         ;

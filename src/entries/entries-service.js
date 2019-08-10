@@ -10,6 +10,24 @@ const EntriesService = {
         ;
     },
 
+    getByUser(db, user_id) {
+        return db
+            .from('threeaday_entries AS ent')
+            .select('*')
+            .where('ent.user_id', user_id)
+        ;
+    },
+
+    getSomePublic(db, howMany) {
+        return db
+            .from('threeaday_entries AS ent')
+            .select('*')
+            .where('ent.public', true)
+            .orderBy('ent.date_modified', 'desc')
+            .limit(howMany)
+        ;
+    },
+
     insertEntry(db, newEntry) {
         return db
             .insert(newEntry)
@@ -39,6 +57,9 @@ const EntriesService = {
             tag_serenity: entry.tag_serenity,
             tag_other: xss(entry.tag_other),
         }
+    },
+    serializeEntries(entries) {
+        return entries.map(this.serializeEntry)
     },
 }
 
