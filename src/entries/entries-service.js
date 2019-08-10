@@ -15,6 +15,7 @@ const EntriesService = {
             .from('threeaday_entries AS ent')
             .select('*')
             .where('ent.user_id', user_id)
+            .orderBy('ent.date_modified', 'desc')
         ;
     },
 
