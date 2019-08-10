@@ -29,13 +29,14 @@ const EntriesService = {
         ;
     },
 
-    insertEntry(db, newEntry) {
+    insertEntries(db, newEntries) {
         return db
-            .insert(newEntry)
+            .insert(newEntries)
             .into('threeaday_entries')
             .returning('*')
-            .then(([entry]) => entry)
-            .then(entry => EntriesService.getById(db, entry.id))
+            //.then(([entry]) => entry)
+            //.then(entry => EntriesService.getById(db, entry.id))
+            //.then(entries => entries.map(entry => EntriesService.getById(db, entry.id)))
         ;
     },
 

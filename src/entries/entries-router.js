@@ -19,54 +19,58 @@ entriesRouter
         ;
     })
     .post(requireAuth, jsonParser, (req, res, next) => {
-        const {
-            content,
-            public,
-            date_modified,
-            tag_amusement,
-            tag_awe,
-            tag_contentment,
-            tag_gratitude,
-            tag_inspiration,
-            tag_joy,
-            tag_hope,
-            tag_love,
-            tag_pride,
-            tag_serenity,
-            tag_other
-        } = req.body;
+        const userId = req.user.id;
+        console.log('userId: ', userId);
 
-        if (!req.body.content) {
-            logger.error(`Missing 'content' in entry post request`);
+        if (!Array.isArray(req.body)) {
+            logger.error(`Post request must be an array of objects`);
             return res.status(400).json({
-                error: `Missing 'content' in request body`
+                error: `Request body must be an array of objects`
             })
         }
 
-        const newEntry = {
-            user_id: req.user.id,
-            content,
-            public,
-            date_modified,
-            tag_amusement,
-            tag_awe,
-            tag_contentment,
-            tag_gratitude,
-            tag_inspiration,
-            tag_joy,
-            tag_hope,
-            tag_love,
-            tag_pride,
-            tag_serenity,
-            tag_other
-        };
+        // for each item in array:
+        // check that it has "content" key
+        // return array where each entry only includes expected list of keys
+        
+        const requestArray = req.body;
 
-        EntriesService.insertEntry(req.app.get('db'), newEntry)
-            .then(entry => {
+        requestArray.forEach(entry => {
+            const { content } = entry;
+            if (!content) {
+                logger.error(`Missing 'content' in entry post request`);
+                return res.status(400).json({
+                    error: `Missing 'content' in request body`
+                })
+            }
+        })
+
+        const cleanRequestArray = requestArray.map(entry => {
+            return {
+                user_id: userId,
+                content: entry.content,
+                public: entry.public,
+                date_modified: entry.date_modified,
+                tag_amusement: entry.tag_amusement,
+                tag_awe: entry.tag_awe,
+                tag_contentment: entry.tag_contentment,
+                tag_gratitude: entry.tag_gratitude,
+                tag_inspiration: entry.tag_inspiration,
+                tag_joy: entry.tag_joy,
+                tag_hope: entry.tag_hope,
+                tag_love: entry.tag_love,
+                tag_pride: entry.tag_pride,
+                tag_serenity: entry.tag_serenity,
+                tag_other: entry.tag_other
+            }
+        })
+
+        EntriesService.insertEntries(req.app.get('db'), cleanRequestArray)
+            .then(entries => {
                 res
                     .status(201)
-                    .location(path.posix.join(req.originalUrl, `/${entry.id}`))
-                    .json(EntriesService.serializeEntry(entry))
+                    //.location(path.posix.join(req.originalUrl, `/${entry.id}`))
+                    .json(EntriesService.serializeEntries(entries))
                 ;
             })
             .catch(next)
