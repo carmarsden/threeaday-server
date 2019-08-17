@@ -1,34 +1,71 @@
 # 3aDay Server
 
-This was created with Express boilerplate.
-This project creates an Express server equipped with appropriate middleware & testing libraries, which is built to interface with PostgreSQL database including SQL query building and database migrations.
+Server API interface for storing and delivering "Three Good Things" data.
 
-## Set up
+## Links
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+* [App Demo](https://threeaday-app.carmarsden.now.sh)
+* [App Documentation](https://github.com/carmarsden/threeaday-app)
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
-6. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-7. Edit `.env` file with true environment variables. Edit `config.js` DB_NAME to your database name and username.
-8. Create migrations folder for postgrator `mkdir migrations`
+## Technology
 
-## Scripts
+### Built with:
+* Node.js
+    * Express server framework
+    * Jsonwebtoken and bcrypt.js for authentication
+    * Morgan and Winston for logging 
+* PostgreSQL database
+    * Knex.js for query building
+    * Postgrator for versioning
+* Testing on Mocha framework using Chai and Supertest
 
-- Start the application: `npm start`
-- Start nodemon for the application: `npm run dev`
-- Run tests: `npm test` or `npm t`
-- Run tests in watch mode: `npm run test:watch`
-- Migrate local database: `npm run migrate`
+## API Documentation
+
+All endpoints require application/json body for post requests, and return JSON.
+
+### Create Account:
+
+`POST /api/users`
+
+* Post `{ user_name, password }` object to create a new user entry in threeaday_users table
+    * Note: user_name cannot already exist
+    * Note: password must be 8 - 72 character and must contain at least one lowercase letter, uppercase letter, number, and special character
+* Successful post request will return JSON object containing `user_name, id, date_created, date_modified`
 
 
-## Deploying
+### Login: 
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku".
+`POST /api/auth/login`
 
-Check `postgrator-production-config.js` file to update production database variables.
+* Post `{ user_name, password }` object to log in to the application
+* Successful post request will return JWT containing user_id payload
 
-Run `npm run deploy` which will do an NPM audit, migrate the production database, and push to this remote's master branch.
+### Public Entries:
+
+`GET /api/entries`
+
+* Get some quantity of public entries (where `public = true`)
+    * Optional query parameter: `quantity`, must be an integer. If provided request will return up to that quantity of entries. Default 10 if not specified.
+* Successful get request will return array of JSON objects containing `id, content, user_id, date_modified,` and all available emotion tags, sorted descending by date
+
+### Private Entries:
+
+`GET /api/entries/byuser`
+
+* Protected endpoint: header must include `Authorization` bearing a valid JWT
+* Get all entries for the requesting user
+    * `user_id` derived from JWT
+* Successful get request will return array of JSON objects containing `id, content, user_id, date_modified,` and all available emotion tags, sorted descending by date
+
+
+### Add Entry:
+
+`POST /api/entries`
+
+* Protected endpoint: header must include `Authorization` bearing a valid JWT
+* Post an array of JSON object(s)
+    * Each object must minimally contain `content` value
+    * Each object may also contain `public, date_modified,` and all emotion tag values
+    * User_id derived from JWT
+    * Default values applied to public, date modified, and emotion tags if not supplied
+* Successful post request will return JSON array of posted objects
